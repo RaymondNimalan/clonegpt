@@ -13,16 +13,17 @@ function App() {
     console.log('submit');
 
     //fetch request to api then combining the chat log array of messages and sending it as a message
-    const response = await fetch('http://localhost:3001', {
+    const response = await fetch('http://localhost:3221/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: chatLog.map((message) => message.message).join(''),
+        message: chatLog.map((message) => message.message),
       }),
     });
     const data = await response.json();
+    console.log('data recieved on front end', data);
     setChatLog([...chatLog, { user: 'gpt', message: `${data.message}` }]);
     console.log('data received after post request', data.message);
   }
