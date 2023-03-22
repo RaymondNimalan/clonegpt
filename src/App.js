@@ -5,27 +5,36 @@ import { useState } from 'react';
 function App() {
   const [input, setInput] = useState('');
   const [chatLog, setChatLog] = useState([]);
+  console.log('chatLog state', chatLog);
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setChatLog([...chatLog, { user: 'me', message: `${input}` }]);
+    let chatLogNew = [...chatLog, { user: 'me', message: `${input}` }];
     setInput('');
-    console.log('submit');
+    console.log('input and chatLog start', input, chatLog);
+    const messages = chatLogNew.map((message) => message.message).join('\n');
+    console.log('messages', messages);
 
     //fetch request to api then combining the chat log array of messages and sending it as a message
-    const response = await fetch('http://localhost:3221/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: chatLog.map((message) => message.message),
-      }),
-    });
-    const data = await response.json();
-    console.log('data recieved on front end', data);
-    setChatLog([...chatLog, { user: 'gpt', message: `${data.message}` }]);
-    console.log('data received after post request', data.message);
+
+    try {
+      const response = await fetch('http://localhost:7653/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messages,
+        }),
+      });
+      const data = await response.json();
+      console.log('data recieved on front end', data);
+      setChatLog([...chatLogNew, { user: 'gpt', message: `${data.message}` }]);
+      console.log('data received after post request', data.message);
+      console.log('input and chatLog end', input, chatLog);
+    } catch (error) {
+      console.log('error fetching', error);
+    }
   }
 
   return (
@@ -55,9 +64,7 @@ function App() {
         </div>
         <div className='footer'>
           CloneGPT created by Raymond Nimalan. Check out my github and portfolio
-          website! Portions of this page are reproduced from work created and
-          shared by the Android Open Source Project and used according to terms
-          described in the Creative Commons 3.0 Attribution License.
+          website!
         </div>
       </section>
     </div>
