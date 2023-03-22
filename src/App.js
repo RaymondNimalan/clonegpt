@@ -1,11 +1,16 @@
 import logo from './logo.svg';
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function App() {
   const [input, setInput] = useState('');
+  const [model, setModel] = useState([]);
   const [chatLog, setChatLog] = useState([]);
   console.log('chatLog state', chatLog);
+
+  function clearChat() {
+    setChatLog([]);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -40,7 +45,7 @@ function App() {
   return (
     <div className='App'>
       <aside className='sidemenu'>
-        <div className='side-menu-button'>
+        <div className='side-menu-button' onClick={clearChat}>
           <span>+</span>
           New Chat
         </div>
