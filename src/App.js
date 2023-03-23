@@ -1,15 +1,28 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, useEffect } from 'react';
 
 function App() {
   const [input, setInput] = useState('');
   const [model, setModel] = useState([]);
+  const [currentModel, setCurrentModel] = useState('text-davinci-003');
   const [chatLog, setChatLog] = useState([]);
   console.log('chatLog state', chatLog);
+  console.log('model state', model);
+
+  useEffect(() => {
+    getModels();
+  }, []);
 
   function clearChat() {
     setChatLog([]);
+  }
+
+  async function getModels() {
+    const response = await fetch('http://localhost:7653/models');
+    const models = await response.json();
+    console.log('models', models);
+    setModel(models);
+    console.log('get models', models);
   }
 
   async function handleSubmit(e) {
@@ -17,8 +30,9 @@ function App() {
     let chatLogNew = [...chatLog, { user: 'me', message: `${input}` }];
     setInput('');
     console.log('input and chatLog start', input, chatLog);
-    const messages = chatLogNew.map((message) => message.message).join('\n');
+    const messages = chatLogNew.map((message) => message.message).join('');
     console.log('messages', messages);
+    console.log('current model', currentModel);
 
     //fetch request to api then combining the chat log array of messages and sending it as a message
 
@@ -30,6 +44,7 @@ function App() {
         },
         body: JSON.stringify({
           message: messages,
+          currentModel: currentModel,
         }),
       });
       const data = await response.json();
@@ -48,6 +63,15 @@ function App() {
         <div className='side-menu-button' onClick={clearChat}>
           <span>+</span>
           New Chat
+        </div>
+        <div className='models'>
+          <select onChange={(e) => setCurrentModel(e.target.value)}>
+            {model.map((model, index) => (
+              <option key={index} value={model.id}>
+                {model.id}
+              </option>
+            ))}
+          </select>
         </div>
       </aside>
       <section className='chatbox'>
@@ -78,15 +102,19 @@ function App() {
 
 const ChatMessage = ({ message }) => {
   return (
-    <div className={`chat-message-container ${message.user === 'gpt'}`}>
+    <div
+      className={`chat-message-container ${
+        message.user === 'gpt' ? 'gpt' : ''
+      }`}
+    >
       <div className='chat-message'>
-        <div className={`avatar ${message.user === 'gpt'}`}>
+        <div className={`avatar ${message.user === 'gpt' ? 'gpt' : ''}`}>
           {message.user === 'gpt' && (
             <svg
               fill='none'
               xmlns='http:www.w3.org/2000/svg'
               strokeWidth={1.5}
-              viewBox='0 0 40 40'
+              viewBox='0 0 80 40'
             ></svg>
           )}
         </div>
